@@ -1,0 +1,1040 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Кабинет писателя</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#2F6F62">
+<link rel="icon" href="icon-192.png">
+<style>
+  :root{
+    --ink:#1F1B16;
+    --paper:#F7F3E8;
+    --paper-edge:#E7DFC9;
+    --accent:#2F6F62;
+    --accent-dim:#244F46;
+    --wax:#A23B2B;
+    --mono:'JetBrains Mono', 'Courier New', monospace;
+    --serif:'PT Serif', Georgia, 'Times New Roman', serif;
+  }
+  [data-theme="dark"]{
+    --ink:#E8E3D8;
+    --paper:#15171A;
+    --paper-edge:#23262B;
+    --accent:#5FB3A1;
+    --accent-dim:#3C8C7C;
+    --wax:#D9684F;
+  }
+  [data-theme="oldbook"]{
+    --ink:#4A3A22;
+    --paper:#EFE0BE;
+    --paper-edge:#D9C690;
+    --accent:#7A5A2E;
+    --accent-dim:#5E4421;
+    --wax:#8B2E20;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;height:100%;}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:var(--serif);
+    transition:background .3s,color .3s;
+    overflow-x:hidden;
+  }
+  #app{min-height:100vh;display:flex;flex-direction:column;}
+
+  header{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:14px 18px;border-bottom:1px solid var(--paper-edge);
+    position:sticky;top:0;background:var(--paper);z-index:20;
+  }
+  .brand{display:flex;align-items:center;gap:10px;cursor:pointer;}
+  .seal{
+    width:34px;height:34px;border-radius:50%;
+    background:var(--accent);color:var(--paper);
+    display:flex;align-items:center;justify-content:center;
+    font-family:var(--serif);font-weight:700;font-size:16px;
+    box-shadow:0 1px 0 rgba(0,0,0,.15) inset;
+  }
+  .brand-title{font-weight:700;font-size:17px;letter-spacing:.2px;}
+  .brand-title small{display:block;font-family:var(--mono);font-size:10px;font-weight:400;opacity:.6;letter-spacing:1px;text-transform:uppercase;}
+  .header-actions{display:flex;gap:8px;}
+  .icon-btn{
+    width:36px;height:36px;border-radius:50%;border:1px solid var(--paper-edge);
+    background:transparent;color:var(--ink);font-size:16px;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .icon-btn:active{background:var(--paper-edge);}
+
+  main{flex:1;display:flex;flex-direction:column;padding:18px;max-width:760px;width:100%;margin:0 auto;}
+
+  .screen{display:none;animation:fade .25s ease;}
+  .screen.active{display:flex;flex-direction:column;gap:18px;}
+  @keyframes fade{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+
+  .eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:2px;text-transform:uppercase;opacity:.55;margin-bottom:2px;}
+  h1.page-title{font-size:26px;margin:0 0 4px;font-weight:700;}
+  p.subtitle{margin:0 0 6px;opacity:.7;font-size:14px;}
+
+  .card-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+  @media (max-width:480px){.card-row{grid-template-columns:1fr;}}
+  .choice-card{
+    border:1px solid var(--paper-edge);border-radius:4px;padding:22px 16px;
+    background:var(--paper);cursor:pointer;text-align:left;
+    transition:transform .15s, box-shadow .15s, border-color .15s;
+    position:relative;overflow:hidden;
+  }
+  .choice-card:active{transform:scale(.98);}
+  .choice-card:hover{border-color:var(--accent);box-shadow:0 4px 16px rgba(0,0,0,.08);}
+  .choice-card .big-letter{font-size:34px;font-weight:700;color:var(--accent);line-height:1;margin-bottom:10px;}
+  .choice-card h3{margin:0 0 4px;font-size:18px;}
+  .choice-card p{margin:0;font-size:13px;opacity:.65;}
+
+  .works-list{display:flex;flex-direction:column;gap:8px;margin-top:6px;}
+  .work-item{
+    display:flex;justify-content:space-between;align-items:center;
+    padding:10px 14px;border:1px solid var(--paper-edge);border-radius:4px;cursor:pointer;
+  }
+  .work-item:active{background:var(--paper-edge);}
+  .work-item .wt{font-weight:700;font-size:14px;}
+  .work-item .wm{font-family:var(--mono);font-size:11px;opacity:.55;}
+
+  .field{display:flex;flex-direction:column;gap:6px;}
+  .field label{font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:1px;opacity:.6;}
+  input[type=text], select, input[type=password]{
+    font-family:var(--serif);font-size:15px;padding:10px 12px;
+    border:1px solid var(--paper-edge);border-radius:3px;background:transparent;color:var(--ink);
+  }
+  input[type=text]:focus, select:focus, input[type=password]:focus{outline:1px solid var(--accent);}
+  .radio-row{display:flex;gap:10px;}
+  .radio-pill{
+    flex:1;border:1px solid var(--paper-edge);border-radius:3px;padding:12px;text-align:center;
+    cursor:pointer;font-size:14px;
+  }
+  .radio-pill.selected{border-color:var(--accent);background:rgba(47,111,98,.08);font-weight:700;}
+  .btn{
+    font-family:var(--mono);font-size:13px;letter-spacing:.5px;text-transform:uppercase;
+    background:var(--accent);color:var(--paper);border:none;border-radius:3px;
+    padding:13px 18px;cursor:pointer;
+  }
+  .btn:active{background:var(--accent-dim);}
+  .btn.secondary{background:transparent;color:var(--ink);border:1px solid var(--paper-edge);}
+  .btn.danger{background:var(--wax);}
+  .btn-row{display:flex;gap:10px;}
+
+  .editor-toolbar{
+    display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:12px;
+    font-family:var(--mono);font-size:11px;
+  }
+  .toolbar-group{display:flex;gap:4px;border:1px solid var(--paper-edge);border-radius:20px;padding:3px;}
+  .toolbar-btn{
+    border:none;background:transparent;color:var(--ink);border-radius:16px;padding:6px 11px;
+    cursor:pointer;font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:.5px;
+  }
+  .toolbar-btn.active{background:var(--accent);color:var(--paper);}
+
+  .page-wrap{display:flex;justify-content:center;}
+  .page{
+    background:var(--paper);
+    border:1px solid var(--paper-edge);
+    box-shadow:0 2px 18px rgba(0,0,0,.08);
+    padding:34px 30px;
+    font-size:17px;line-height:1.85;
+    outline:none;white-space:pre-wrap;word-wrap:break-word;
+    min-height:60vh;
+  }
+  .page.a4{width:100%;max-width:560px;aspect-ratio:210/297;overflow-y:auto;}
+  .page.book{width:100%;max-width:430px;min-height:65vh;}
+  .page.poem{font-family:var(--serif);}
+
+  .word-count{font-family:var(--mono);font-size:11px;opacity:.5;text-align:right;margin-top:8px;}
+
+  .popover{
+    position:fixed;z-index:50;background:var(--ink);color:var(--paper);
+    border-radius:6px;padding:10px;font-size:13px;max-width:280px;
+    box-shadow:0 6px 24px rgba(0,0,0,.35);
+  }
+  .popover .pop-title{font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:1px;opacity:.65;margin-bottom:6px;}
+  .popover .chip-row{display:flex;flex-wrap:wrap;gap:6px;}
+  .popover .chip{
+    background:rgba(255,255,255,.12);border-radius:12px;padding:5px 10px;cursor:pointer;font-size:12.5px;
+  }
+  .popover .chip:active{background:rgba(255,255,255,.25);}
+  .popover .rhyme-result{font-weight:700;}
+  .popover .close-pop{position:absolute;top:6px;right:8px;cursor:pointer;opacity:.6;font-size:12px;}
+
+  .modal-bg{
+    position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;
+    align-items:center;justify-content:center;z-index:60;padding:18px;
+  }
+  .modal-bg.active{display:flex;}
+  .modal{
+    background:var(--paper);color:var(--ink);border-radius:6px;padding:22px;
+    max-width:460px;width:100%;max-height:82vh;overflow-y:auto;
+  }
+  .modal h2{margin-top:0;font-size:18px;}
+  .modal .field{margin-bottom:14px;}
+  .hint{font-size:12px;opacity:.6;line-height:1.5;}
+  .ai-result{font-size:14px;line-height:1.7;white-space:pre-wrap;margin-top:10px;}
+  .loading{font-family:var(--mono);font-size:12px;opacity:.6;}
+
+  .notes-wrap{margin-top:14px;border:1px dashed var(--paper-edge);border-radius:4px;padding:10px 12px;}
+  .notes-wrap label{font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:1px;opacity:.55;display:block;margin-bottom:6px;}
+  .notes-wrap textarea{
+    width:100%;min-height:60px;resize:vertical;border:none;background:transparent;color:var(--ink);
+    font-family:var(--serif);font-size:14px;outline:none;line-height:1.5;
+  }
+
+  .file-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;}
+
+  .assist-bar{
+    display:none;gap:8px;margin-top:10px;background:var(--paper);
+    border:1px solid var(--accent);border-radius:24px;padding:6px 6px 6px 16px;align-items:center;
+    animation:fade .2s ease;
+  }
+  .assist-bar.active{display:flex;}
+  .assist-bar input{
+    flex:1;border:none;background:transparent;color:var(--ink);font-family:var(--serif);font-size:14px;outline:none;
+  }
+  .assist-bar button{
+    background:var(--accent);color:var(--paper);border:none;border-radius:18px;
+    padding:9px 16px;font-family:var(--mono);font-size:11px;text-transform:uppercase;cursor:pointer;white-space:nowrap;
+  }
+
+  .neuron-stage{position:relative;width:240px;height:240px;margin:10px auto;}
+  .neuron-core{
+    position:absolute;left:50%;top:50%;width:34px;height:34px;margin:-17px;
+    border-radius:50%;background:radial-gradient(circle at 35% 30%, #8FD9FF, #2D6CDF 70%);
+    box-shadow:0 0 18px 4px rgba(45,108,223,.6);
+    animation:pulse 1.1s ease-in-out infinite;
+  }
+  @keyframes pulse{0%,100%{transform:scale(1);}50%{transform:scale(1.18);}}
+  .neuron-node{
+    position:absolute;width:10px;height:10px;border-radius:50%;
+    background:#6FB8FF;box-shadow:0 0 8px 2px rgba(111,184,255,.7);
+  }
+  .neuron-line{
+    position:absolute;height:2px;background:linear-gradient(90deg, rgba(111,184,255,0), #BEE3FF, rgba(111,184,255,0));
+    transform-origin:left center;opacity:0;
+  }
+  .neuron-line.flash{animation:flash .55s ease-out;}
+  @keyframes flash{0%{opacity:0;}25%{opacity:1;}100%{opacity:0;}}
+  .assist-status{text-align:center;font-family:var(--mono);font-size:11px;opacity:.6;margin-top:4px;}
+
+  ::-webkit-scrollbar{width:8px;}
+  ::-webkit-scrollbar-thumb{background:var(--paper-edge);border-radius:4px;}
+</style>
+</head>
+<body data-theme="light">
+<div id="app">
+
+  <header>
+    <div class="brand" onclick="goMenu()">
+      <div class="seal">П</div>
+      <div class="brand-title">Кабинет писателя<small id="langTag">RU</small></div>
+    </div>
+    <div class="header-actions">
+      <button class="icon-btn" onclick="openSettings()" title="Настройки">⚙</button>
+    </div>
+  </header>
+
+  <main>
+
+    <section class="screen active" id="screen-menu">
+      <div>
+        <div class="eyebrow" data-i18n="eyebrow-menu">Главное меню</div>
+        <h1 class="page-title" data-i18n="menu-title">Что будем писать?</h1>
+        <p class="subtitle" data-i18n="menu-sub">Выберите тип произведения, чтобы начать</p>
+      </div>
+      <div class="card-row">
+        <div class="choice-card" onclick="startNew('poem')">
+          <div class="big-letter">С</div>
+          <h3 data-i18n="card-poem">Стихотворение</h3>
+          <p data-i18n="card-poem-sub">Синонимы, проверка рифмы, размер строки</p>
+        </div>
+        <div class="choice-card" onclick="startNew('book')">
+          <div class="big-letter">К</div>
+          <h3 data-i18n="card-book">Книга</h3>
+          <p data-i18n="card-book-sub">Главы, проза, ИИ-анализ текста</p>
+        </div>
+      </div>
+
+      <div>
+        <div class="eyebrow" data-i18n="eyebrow-works">Мои работы</div>
+        <div class="works-list" id="worksList"></div>
+      </div>
+    </section>
+
+    <section class="screen" id="screen-form">
+      <div>
+        <div class="eyebrow" id="formEyebrow">Новая работа</div>
+        <h1 class="page-title" data-i18n="form-title">Параметры произведения</h1>
+      </div>
+
+      <div class="field">
+        <label data-i18n="lbl-title">Название</label>
+        <input type="text" id="f-title" placeholder="Без названия">
+      </div>
+
+      <div class="field">
+        <label data-i18n="lbl-genre">Жанр</label>
+        <select id="f-genre"></select>
+      </div>
+
+      <div class="field">
+        <label data-i18n="lbl-format">Размер листа</label>
+        <div class="radio-row">
+          <div class="radio-pill selected" data-val="a4" onclick="selectFormat(this)">A4</div>
+          <div class="radio-pill" data-val="book" onclick="selectFormat(this)" data-i18n="fmt-book">Книжный</div>
+        </div>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn secondary" onclick="goMenu()" data-i18n="btn-cancel">Отмена</button>
+        <button class="btn" onclick="createWork()" data-i18n="btn-start">Начать писать</button>
+      </div>
+    </section>
+
+    <section class="screen" id="screen-editor">
+      <div class="editor-toolbar">
+        <div class="toolbar-group">
+          <button class="toolbar-btn" data-theme-btn="light" onclick="setTheme('light')" data-i18n="th-light">Светлая</button>
+          <button class="toolbar-btn" data-theme-btn="dark" onclick="setTheme('dark')" data-i18n="th-dark">Тёмная</button>
+          <button class="toolbar-btn" data-theme-btn="oldbook" onclick="setTheme('oldbook')" data-i18n="th-old">Старая книга</button>
+        </div>
+        <div class="toolbar-group">
+          <button class="toolbar-btn" onclick="setLang('ru')" data-lang-btn="ru">RU</button>
+          <button class="toolbar-btn" onclick="setLang('en')" data-lang-btn="en">EN</button>
+        </div>
+        <button class="btn secondary" style="padding:7px 12px;font-size:11px" onclick="runAIAnalysis()" data-i18n="btn-analyze">✦ Анализ ИИ</button>
+        <button class="btn secondary" style="padding:7px 12px;font-size:11px" onclick="toggleAssistBar()" data-i18n="btn-assist">✦ Помощь ИИ</button>
+        <button class="btn" style="padding:7px 12px;font-size:11px" onclick="saveWork(true)" data-i18n="btn-save">Сохранить</button>
+      </div>
+
+      <div class="assist-bar" id="assistBar">
+        <input type="text" id="assistInput" data-i18n-ph="assist-placeholder" placeholder="Что будет дальше? Можно оставить пустым — ИИ сам придумает">
+        <button onclick="submitAssist()" data-i18n="btn-send">Отправить</button>
+      </div>
+
+      <div class="page-wrap">
+        <div id="page" class="page a4 poem" contenteditable="true" spellcheck="true"></div>
+      </div>
+      <div class="word-count" id="wordCount">0 слов</div>
+      <p class="hint" data-i18n="hint-select">Выделите одно слово — появятся синонимы. Выделите несколько слов — проверка рифмы.</p>
+
+      <div class="notes-wrap">
+        <label data-i18n="lbl-notes">Заметки (важное для ИИ — сюжет, герои, идеи)</label>
+        <textarea id="notesField" placeholder="Например: герой не должен умирать, действие происходит зимой…" oninput="onNotesInput()"></textarea>
+      </div>
+
+      <div class="file-row">
+        <button class="btn secondary" onclick="downloadWorkFile()" data-i18n="btn-download">⬇ Сохранить файл</button>
+        <button class="btn secondary" onclick="document.getElementById('fileInput').click()" data-i18n="btn-upload">⬆ Загрузить файл</button>
+        <input type="file" id="fileInput" accept=".txt" style="display:none" onchange="loadWorkFile(event)">
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<div class="popover" id="popover" style="display:none"></div>
+
+<div class="modal-bg" id="settingsModal">
+  <div class="modal">
+    <h2 data-i18n="settings-title">Настройки</h2>
+
+    <div class="field">
+      <label data-i18n="lbl-apikey">API-ключ OpenAI (для ИИ-анализа текста)</label>
+      <input type="password" id="apiKeyInput" placeholder="sk-...">
+      <div class="hint" data-i18n="hint-apikey">Ключ хранится только в этом браузере и используется для запросов синонимов/анализа, если выбрано «через ИИ». Получить ключ можно на platform.openai.com.</div>
+    </div>
+
+    <div class="field">
+      <label data-i18n="lbl-syn-source">Источник синонимов</label>
+      <select id="synSource">
+        <option value="auto" data-i18n="syn-auto">Авто (ИИ, если есть ключ, иначе словарь)</option>
+        <option value="dict" data-i18n="syn-dict">Только встроенный словарь / интернет-сервис</option>
+        <option value="ai" data-i18n="syn-ai">Только ИИ</option>
+      </select>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn secondary" onclick="closeSettings()" data-i18n="btn-close">Закрыть</button>
+      <button class="btn" onclick="saveSettings()" data-i18n="btn-save-settings">Сохранить настройки</button>
+    </div>
+
+    <div class="field" style="margin-top:18px;">
+      <button class="btn danger" onclick="clearAllData()" data-i18n="btn-clear">Удалить все работы и настройки</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-bg" id="aiModal">
+  <div class="modal">
+    <h2 data-i18n="ai-title">Анализ ИИ</h2>
+    <div id="aiContent" class="loading" data-i18n="ai-loading">Анализирую текст…</div>
+    <div class="btn-row" style="margin-top:16px;">
+      <button class="btn secondary" onclick="closeAI()" data-i18n="btn-close">Закрыть</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-bg" id="assistModal">
+  <div class="modal">
+    <h2 data-i18n="assist-title">Помощь ИИ</h2>
+    <div id="assistStage">
+      <div class="neuron-stage" id="neuronStage">
+        <div class="neuron-core"></div>
+      </div>
+      <div class="assist-status" id="assistStatus" data-i18n="assist-thinking">ИИ обдумывает продолжение…</div>
+    </div>
+    <div id="assistResultWrap" style="display:none;">
+      <div class="ai-result" id="assistResult"></div>
+    </div>
+    <div class="btn-row" style="margin-top:16px;">
+      <button class="btn secondary" onclick="closeAssist()" data-i18n="btn-close">Закрыть</button>
+      <button class="btn" id="assistInsertBtn" style="display:none;" onclick="insertAssistResult()" data-i18n="btn-insert">Вставить в текст</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const LS_WORKS = "pisatel_works";
+const LS_SETTINGS = "pisatel_settings";
+
+let state = {
+  works: JSON.parse(localStorage.getItem(LS_WORKS) || "[]"),
+  settings: JSON.parse(localStorage.getItem(LS_SETTINGS) || '{"apiKey":"","synSource":"auto","lang":"ru","theme":"light"}'),
+  currentWork: null,
+  pendingType: null
+};
+
+const GENRES = {
+  poem: { ru: ["Лирика","Любовная","Гражданская","Пейзажная","Философская","Юмористическая","Сатира","Романс","Баллада","Другое"],
+          en: ["Lyric","Love","Civic","Nature","Philosophical","Humorous","Satire","Romance","Ballad","Other"] },
+  book: { ru: ["Роман","Повесть","Рассказ","Фантастика","Фэнтези","Детектив","Триллер","Драма","Нон-фикшн","Другое"],
+          en: ["Novel","Novella","Short story","Sci-Fi","Fantasy","Detective","Thriller","Drama","Non-fiction","Other"] }
+};
+
+const I18N = {
+  ru: {
+    "eyebrow-menu":"Главное меню","menu-title":"Что будем писать?","menu-sub":"Выберите тип произведения, чтобы начать",
+    "card-poem":"Стихотворение","card-poem-sub":"Синонимы, проверка рифмы, размер строки",
+    "card-book":"Книга","card-book-sub":"Главы, проза, ИИ-анализ текста",
+    "eyebrow-works":"Мои работы","form-title":"Параметры произведения",
+    "lbl-title":"Название","lbl-genre":"Жанр","lbl-format":"Размер листа","fmt-book":"Книжный",
+    "btn-cancel":"Отмена","btn-start":"Начать писать",
+    "th-light":"Светлая","th-dark":"Тёмная","th-old":"Старая книга",
+    "btn-analyze":"✦ Анализ ИИ","btn-save":"Сохранить",
+    "hint-select":"Выделите одно слово — появятся синонимы. Выделите несколько слов — проверка рифмы.",
+    "settings-title":"Настройки","lbl-apikey":"API-ключ OpenAI (для ИИ-анализа текста)",
+    "hint-apikey":"Ключ хранится только в этом браузере и используется для запросов синонимов/анализа, если выбрано «через ИИ». Получить ключ можно на platform.openai.com.",
+    "lbl-syn-source":"Источник синонимов","syn-auto":"Авто (ИИ, если есть ключ, иначе словарь)",
+    "syn-dict":"Только встроенный словарь / интернет-сервис","syn-ai":"Только ИИ",
+    "btn-close":"Закрыть","btn-save-settings":"Сохранить настройки","btn-clear":"Удалить все работы и настройки",
+    "ai-title":"Анализ ИИ","ai-loading":"Анализирую текст…",
+    "no-works":"Пока нет сохранённых работ", "synonyms-title":"Синонимы","rhyme-title":"Проверка рифмы",
+    "rhyme-yes":"✓ Рифмуется","rhyme-no":"✗ Не рифмуется","no-synonyms":"Синонимы не найдены",
+    "need-key":"Добавьте API-ключ OpenAI в настройках, чтобы получить ИИ-анализ.",
+    "ai-error":"Не удалось получить ответ. Проверьте ключ и подключение к интернету.",
+    "btn-assist":"✦ Помощь ИИ","assist-placeholder":"Что будет дальше? Можно оставить пустым — ИИ сам придумает",
+    "btn-send":"Отправить","assist-title":"Помощь ИИ","assist-thinking":"ИИ обдумывает продолжение…",
+    "btn-insert":"Вставить в текст","lbl-notes":"Заметки (важное для ИИ — сюжет, герои, идеи)",
+    "btn-download":"⬇ Сохранить файл","btn-upload":"⬆ Загрузить файл",
+    "file-saved":"Файл сохранён","file-bad-format":"Можно загружать только файлы, сохранённые этим приложением (Pis_…)",
+    "file-loaded":"Файл загружен","need-key-assist":"Чтобы ИИ продолжил текст, добавьте API-ключ OpenAI в настройках."
+  },
+  en: {
+    "eyebrow-menu":"Main menu","menu-title":"What shall we write?","menu-sub":"Choose a type of work to begin",
+    "card-poem":"Poem","card-poem-sub":"Synonyms, rhyme check, line size",
+    "card-book":"Book","card-book-sub":"Chapters, prose, AI text analysis",
+    "eyebrow-works":"My works","form-title":"Work parameters",
+    "lbl-title":"Title","lbl-genre":"Genre","lbl-format":"Page size","fmt-book":"Book size",
+    "btn-cancel":"Cancel","btn-start":"Start writing",
+    "th-light":"Light","th-dark":"Dark","th-old":"Old book",
+    "btn-analyze":"✦ AI analysis","btn-save":"Save",
+    "hint-select":"Select one word for synonyms. Select several words to check the rhyme.",
+    "settings-title":"Settings","lbl-apikey":"OpenAI API key (for AI text analysis)",
+    "hint-apikey":"The key is stored only in this browser and used for synonym/analysis requests when AI mode is selected. Get a key at platform.openai.com.",
+    "lbl-syn-source":"Synonym source","syn-auto":"Auto (AI if key present, else dictionary)",
+    "syn-dict":"Built-in dictionary / web service only","syn-ai":"AI only",
+    "btn-close":"Close","btn-save-settings":"Save settings","btn-clear":"Delete all works and settings",
+    "ai-title":"AI Analysis","ai-loading":"Analyzing text…",
+    "no-works":"No saved works yet", "synonyms-title":"Synonyms","rhyme-title":"Rhyme check",
+    "rhyme-yes":"✓ Rhymes","rhyme-no":"✗ Doesn't rhyme","no-synonyms":"No synonyms found",
+    "need-key":"Add your OpenAI API key in settings to get AI analysis.",
+    "ai-error":"Couldn't get a response. Check your key and internet connection.",
+    "btn-assist":"✦ AI Help","assist-placeholder":"What happens next? Leave empty for AI's own idea",
+    "btn-send":"Send","assist-title":"AI Help","assist-thinking":"AI is thinking up what's next…",
+    "btn-insert":"Insert into text","lbl-notes":"Notes (important for AI — plot, characters, ideas)",
+    "btn-download":"⬇ Save file","btn-upload":"⬆ Load file",
+    "file-saved":"File saved","file-bad-format":"You can only load files saved by this app (Pis_…)",
+    "file-loaded":"File loaded","need-key-assist":"Add your OpenAI API key in settings so AI can continue the text."
+  }
+};
+
+function t(key){ return I18N[state.settings.lang][key] || key; }
+
+const RU_DICT = {
+  "красивый":["прекрасный","изящный","чудесный","прелестный","великолепный"],
+  "грустный":["печальный","унылый","тоскливый","скорбный","мрачный"],
+  "счастье":["радость","блаженство","веселье","удача","ликование"],
+  "любовь":["нежность","страсть","привязанность","влечение","симпатия"],
+  "дом":["жилище","обитель","хата","кров","жильё"],
+  "большой":["огромный","громадный","крупный","масштабный","великий"],
+  "маленький":["крошечный","небольшой","миниатюрный","малый"],
+  "идти":["шагать","брести","шествовать","двигаться","ступать"],
+  "смотреть":["глядеть","взирать","наблюдать","созерцать"],
+  "говорить":["молвить","произносить","изрекать","высказывать"],
+  "темнота":["мрак","тьма","сумрак","потёмки"],
+  "свет":["сияние","блеск","луч","зарево"],
+  "ночь":["тьма","полночь","сумерки"],
+  "ветер":["вихрь","сквозняк","буря","зефир"],
+  "море":["пучина","океан","волны","бездна"]
+};
+const EN_DICT = {
+  "beautiful":["lovely","gorgeous","stunning","elegant","exquisite"],
+  "sad":["sorrowful","mournful","gloomy","melancholy","downcast"],
+  "happiness":["joy","bliss","delight","gladness"],
+  "love":["affection","tenderness","passion","devotion"],
+  "big":["large","huge","massive","enormous"],
+  "small":["tiny","little","miniature","petite"]
+};
+
+function showScreen(id){
+  document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
+}
+function goMenu(){ renderWorksList(); showScreen("screen-menu"); }
+
+function startNew(type){
+  state.pendingType = type;
+  document.getElementById("formEyebrow").textContent = type==='poem' ? (state.settings.lang==='ru'?'Новый стих':'New poem') : (state.settings.lang==='ru'?'Новая книга':'New book');
+  const genreSel = document.getElementById("f-genre");
+  genreSel.innerHTML = "";
+  GENRES[type][state.settings.lang].forEach(g=>{
+    const o=document.createElement("option"); o.value=g; o.textContent=g; genreSel.appendChild(o);
+  });
+  document.getElementById("f-title").value = "";
+  document.querySelectorAll(".radio-pill").forEach(p=>p.classList.remove("selected"));
+  document.querySelector('.radio-pill[data-val="a4"]').classList.add("selected");
+  showScreen("screen-form");
+}
+
+function selectFormat(el){
+  document.querySelectorAll(".radio-pill").forEach(p=>p.classList.remove("selected"));
+  el.classList.add("selected");
+}
+
+function createWork(){
+  const title = document.getElementById("f-title").value.trim() || (state.settings.lang==='ru'?"Без названия":"Untitled");
+  const genre = document.getElementById("f-genre").value;
+  const format = document.querySelector(".radio-pill.selected").dataset.val;
+  const work = {
+    id: "w_"+Date.now(),
+    type: state.pendingType,
+    title, genre, format,
+    lang: state.settings.lang,
+    theme: state.settings.theme,
+    content: "",
+    createdAt: Date.now(),
+    updatedAt: Date.now()
+  };
+  state.works.unshift(work);
+  persistWorks();
+  openEditor(work);
+}
+
+function renderWorksList(){
+  const list = document.getElementById("worksList");
+  list.innerHTML = "";
+  if(state.works.length===0){
+    list.innerHTML = '<div class="hint">' + t("no-works") + '</div>';
+    return;
+  }
+  state.works.forEach(w=>{
+    const div = document.createElement("div");
+    div.className = "work-item";
+    div.onclick = ()=>openEditor(w);
+    const typeLabel = w.type==='poem' ? (state.settings.lang==='ru'?'стих':'poem') : (state.settings.lang==='ru'?'книга':'book');
+    div.innerHTML = '<div><div class="wt">'+escapeHtml(w.title)+'</div><div class="wm">'+typeLabel+' · '+escapeHtml(w.genre)+' · '+w.format.toUpperCase()+'</div></div><div class="wm">›</div>';
+    list.appendChild(div);
+  });
+}
+
+function escapeHtml(s){ const d=document.createElement("div"); d.textContent=s; return d.innerHTML; }
+
+function openEditor(work){
+  state.currentWork = work;
+  setTheme(work.theme || state.settings.theme, true);
+  setLang(work.lang || state.settings.lang, true);
+  const page = document.getElementById("page");
+  page.className = "page " + (work.format==='book' ? 'book' : 'a4') + (work.type==='poem' ? ' poem' : '');
+  page.innerText = work.content || "";
+  document.getElementById("notesField").value = work.notes || "";
+  document.getElementById("assistBar").classList.remove("active");
+  document.getElementById("assistInput").value = "";
+  updateWordCount();
+  showScreen("screen-editor");
+  page.focus();
+}
+
+function onNotesInput(){
+  if(state.currentWork){
+    state.currentWork.notes = document.getElementById("notesField").value;
+  }
+}
+
+function updateWordCount(){
+  const text = document.getElementById("page").innerText || "";
+  const words = text.trim().split(/\s+/).filter(Boolean).length;
+  document.getElementById("wordCount").textContent = words + " " + (state.settings.lang==='ru'?'слов':'words');
+}
+
+document.getElementById("page").addEventListener("input", ()=>{
+  updateWordCount();
+  if(state.currentWork){ state.currentWork.content = document.getElementById("page").innerText; }
+});
+
+function saveWork(notify){
+  if(!state.currentWork) return;
+  state.currentWork.content = document.getElementById("page").innerText;
+  state.currentWork.notes = document.getElementById("notesField").value;
+  state.currentWork.updatedAt = Date.now();
+  state.currentWork.theme = state.settings.theme;
+  state.currentWork.lang = state.settings.lang;
+  const idx = state.works.findIndex(w=>w.id===state.currentWork.id);
+  if(idx>-1) state.works[idx] = state.currentWork;
+  persistWorks();
+  if(notify){
+    const btn = event.target;
+    const old = btn.textContent;
+    btn.textContent = state.settings.lang==='ru' ? "Сохранено ✓" : "Saved ✓";
+    setTimeout(()=>btn.textContent=old, 1200);
+  }
+}
+
+function persistWorks(){ localStorage.setItem(LS_WORKS, JSON.stringify(state.works)); }
+function persistSettings(){ localStorage.setItem(LS_SETTINGS, JSON.stringify(state.settings)); }
+
+function setTheme(theme, silent){
+  state.settings.theme = theme;
+  document.body.setAttribute("data-theme", theme);
+  document.querySelectorAll("[data-theme-btn]").forEach(b=>b.classList.toggle("active", b.dataset.themeBtn===theme));
+  if(!silent) persistSettings();
+}
+function setLang(lang, silent){
+  state.settings.lang = lang;
+  document.getElementById("langTag").textContent = lang.toUpperCase();
+  document.querySelectorAll("[data-lang-btn]").forEach(b=>b.classList.toggle("active", b.dataset.langBtn===lang));
+  applyI18n();
+  if(!silent){ persistSettings(); renderWorksList(); }
+}
+function applyI18n(){
+  document.querySelectorAll("[data-i18n]").forEach(el=>{
+    el.textContent = t(el.getAttribute("data-i18n"));
+  });
+  document.querySelectorAll("[data-i18n-ph]").forEach(el=>{
+    el.setAttribute("placeholder", t(el.getAttribute("data-i18n-ph")));
+  });
+  updateWordCount();
+}
+
+let popoverEl = document.getElementById("popover");
+
+document.getElementById("page").addEventListener("mouseup", handleSelection);
+document.getElementById("page").addEventListener("touchend", handleSelection);
+
+function handleSelection(){
+  setTimeout(()=>{
+    const sel = window.getSelection();
+    const text = sel.toString().trim();
+    if(!text){ hidePopover(); return; }
+    const range = sel.getRangeAt(0);
+    const rect = range.getBoundingClientRect();
+    const words = text.split(/\s+/).filter(Boolean);
+    if(words.length === 1){
+      showSynonymPopover(words[0], rect);
+    } else if(words.length >= 2){
+      showRhymePopover(words, rect);
+    }
+  }, 10);
+}
+
+function positionPopover(rect){
+  const top = Math.max(8, rect.top - 10 - 70);
+  let left = rect.left;
+  if(left + 280 > window.innerWidth) left = window.innerWidth - 290;
+  popoverEl.style.top = (top + window.scrollY) + "px";
+  popoverEl.style.left = Math.max(8,left) + "px";
+  popoverEl.style.display = "block";
+}
+function hidePopover(){ popoverEl.style.display = "none"; }
+
+async function showSynonymPopover(word, rect){
+  popoverEl.innerHTML = '<span class="close-pop" onclick="hidePopover()">✕</span><div class="pop-title">'+t('synonyms-title')+'</div><div class="loading">…</div>';
+  positionPopover(rect);
+  const syns = await getSynonyms(word, state.settings.lang);
+  if(syns.length===0){
+    popoverEl.innerHTML = '<span class="close-pop" onclick="hidePopover()">✕</span><div class="pop-title">'+t('synonyms-title')+'</div><div>'+t('no-synonyms')+'</div>';
+    return;
+  }
+  const chips = syns.map(s=>'<span class="chip" onclick="replaceSelection(\''+s.replace(/'/g,"\\'")+'\')">'+escapeHtml(s)+'</span>').join("");
+  popoverEl.innerHTML = '<span class="close-pop" onclick="hidePopover()">✕</span><div class="pop-title">'+t('synonyms-title')+': '+escapeHtml(word)+'</div><div class="chip-row">'+chips+'</div>';
+}
+
+function replaceSelection(newWord){
+  const sel = window.getSelection();
+  if(sel.rangeCount===0) return;
+  const range = sel.getRangeAt(0);
+  range.deleteContents();
+  range.insertNode(document.createTextNode(newWord));
+  hidePopover();
+  updateWordCount();
+  if(state.currentWork) state.currentWork.content = document.getElementById("page").innerText;
+}
+
+function showRhymePopover(words, rect){
+  const keys = words.map(rhymeKey);
+  const allMatch = keys.every(k=>k===keys[0] && k.length>0);
+  positionPopover(rect);
+  popoverEl.innerHTML = '<span class="close-pop" onclick="hidePopover()">✕</span>'
+    + '<div class="pop-title">'+t('rhyme-title')+'</div>'
+    + '<div class="rhyme-result">'+(allMatch ? t('rhyme-yes') : t('rhyme-no'))+'</div>'
+    + '<div style="margin-top:6px;font-family:var(--mono);font-size:11px;opacity:.6;">'+words.map((w,i)=>w+' → -'+keys[i]).join('  ·  ')+'</div>';
+}
+
+function rhymeKey(word){
+  const w = word.toLowerCase().replace(/[^а-яёa-z]/gi,"");
+  const vowels = "аеёиоуыэюяaeiou";
+  let idx = -1;
+  for(let i=w.length-1;i>=0;i--){ if(vowels.includes(w[i])){ idx=i; break; } }
+  if(idx===-1) return w;
+  return w.slice(idx);
+}
+
+document.addEventListener("mousedown", (e)=>{
+  if(!popoverEl.contains(e.target) && e.target.id !== "page"){ hidePopover(); }
+});
+
+async function getSynonyms(word, lang){
+  const source = state.settings.synSource || "auto";
+  const hasKey = !!state.settings.apiKey;
+
+  if(source === "ai" || (source === "auto" && hasKey)){
+    try{
+      const r = await aiSynonyms(word, lang);
+      if(r && r.length) return r;
+    }catch(e){ /* fall through to dictionary */ }
+  }
+  try{
+    if(lang === "ru"){
+      const local = RU_DICT[word.toLowerCase()];
+      if(local) return local;
+      return await fetchFreeSynonymsRU(word);
+    } else {
+      const local = EN_DICT[word.toLowerCase()];
+      if(local) return local;
+      return await fetchDatamuse(word);
+    }
+  }catch(e){ return []; }
+}
+
+async function fetchDatamuse(word){
+  try{
+    const res = await fetch("https://api.datamuse.com/words?rel_syn=" + encodeURIComponent(word) + "&max=8");
+    const data = await res.json();
+    return data.map(d=>d.word);
+  }catch(e){ return []; }
+}
+
+async function fetchFreeSynonymsRU(word){
+  try{
+    const res = await fetch("https://api.datamuse.com/words?ml=" + encodeURIComponent(word) + "&max=8&v=ru");
+    const data = await res.json();
+    return data.map(d=>d.word).filter(w=>w.toLowerCase()!==word.toLowerCase());
+  }catch(e){ return []; }
+}
+
+async function aiSynonyms(word, lang){
+  const prompt = lang==='ru'
+    ? 'Дай 6 синонимов к слову "'+word+'" на русском языке. Ответь ТОЛЬКО списком слов через запятую, без пояснений.'
+    : 'Give 6 synonyms for the word "'+word+'" in English. Reply ONLY with a comma-separated list, no explanations.';
+  const text = await callOpenAI(prompt, 60);
+  return text.split(",").map(s=>s.trim().replace(/^[\-•\d\.\)]+\s*/,"")).filter(Boolean).slice(0,8);
+}
+
+async function callOpenAI(prompt, maxTokens){
+  const key = state.settings.apiKey;
+  if(!key) throw new Error("no-key");
+  const res = await fetch("https://api.openai.com/v1/chat/completions", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": "Bearer " + key
+    },
+    body: JSON.stringify({
+      model: "gpt-4o-mini",
+      max_tokens: maxTokens || 800,
+      messages: [{ role: "user", content: prompt }]
+    })
+  });
+  if(!res.ok) throw new Error("api-error");
+  const data = await res.json();
+  return (data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content || "").trim();
+}
+
+async function runAIAnalysis(){
+  document.getElementById("aiModal").classList.add("active");
+  const out = document.getElementById("aiContent");
+  out.className = "loading";
+  out.textContent = t("ai-loading");
+
+  if(!state.settings.apiKey){
+    out.className = "hint";
+    out.textContent = t("need-key");
+    return;
+  }
+  const text = document.getElementById("page").innerText.trim();
+  const work = state.currentWork;
+  const lang = state.settings.lang;
+  const isPoem = work && work.type === "poem";
+  const prompt = lang === "ru"
+    ? 'Ты литературный редактор. Проанализируй ' + (isPoem ? "стихотворение" : "отрывок прозы") + ' ниже: оцени ' + (isPoem ? "ритм, рифму, образность" : "стиль, темп повествования, структуру") + ', отметь сильные стороны и дай 3 конкретных совета по улучшению. Будь кратким (до 150 слов).\n\nТекст:\n' + text
+    : 'You are a literary editor. Analyze the ' + (isPoem ? "poem" : "prose excerpt") + ' below: assess ' + (isPoem ? "rhythm, rhyme, imagery" : "style, pacing, structure") + ', note strengths, and give 3 concrete suggestions for improvement. Be concise (under 150 words).\n\nText:\n' + text;
+
+  try{
+    const result = await callOpenAI(prompt, 400);
+    out.className = "ai-result";
+    out.textContent = result || t("ai-error");
+  }catch(e){
+    out.className = "hint";
+    out.textContent = t("ai-error");
+  }
+}
+function closeAI(){ document.getElementById("aiModal").classList.remove("active"); }
+
+function openSettings(){
+  document.getElementById("apiKeyInput").value = state.settings.apiKey || "";
+  document.getElementById("synSource").value = state.settings.synSource || "auto";
+  document.getElementById("settingsModal").classList.add("active");
+}
+function closeSettings(){ document.getElementById("settingsModal").classList.remove("active"); }
+function saveSettings(){
+  state.settings.apiKey = document.getElementById("apiKeyInput").value.trim();
+  state.settings.synSource = document.getElementById("synSource").value;
+  persistSettings();
+  closeSettings();
+}
+function clearAllData(){
+  if(!confirm(state.settings.lang==='ru' ? "Удалить все работы и настройки без возможности восстановления?" : "Delete all works and settings permanently?")) return;
+  localStorage.removeItem(LS_WORKS);
+  localStorage.removeItem(LS_SETTINGS);
+  location.reload();
+}
+
+/* ======================= CUSTOM FILE FORMAT (Pis_) ======================= */
+const FILE_MARKER = "### Pis-файл • не редактируйте эту строку ###";
+const FILE_MARKER_END = "### конец метаданных ###";
+
+function sanitizeFileName(s){
+  return (s || "untitled").trim().replace(/[\\/:*?"<>|]+/g,"").replace(/\s+/g,"_").slice(0,40) || "untitled";
+}
+
+function downloadWorkFile(){
+  if(!state.currentWork) return;
+  saveWork(false);
+  const w = state.currentWork;
+  const meta = {
+    type: w.type, title: w.title, genre: w.genre, format: w.format,
+    lang: w.lang, theme: w.theme, notes: w.notes || ""
+  };
+  const body = [FILE_MARKER, JSON.stringify(meta), FILE_MARKER_END, "", w.content || ""].join("\n");
+  const typeLabel = w.type === "poem" ? "стих" : "книга";
+  const filename = "Pis_" + typeLabel + "_" + sanitizeFileName(w.title) + ".txt";
+  const blob = new Blob([body], { type: "text/plain;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url; a.download = filename;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+function loadWorkFile(evt){
+  const file = evt.target.files[0];
+  evt.target.value = "";
+  if(!file) return;
+  if(!file.name.startsWith("Pis_")){
+    alert(t("file-bad-format"));
+    return;
+  }
+  const reader = new FileReader();
+  reader.onload = () => {
+    const text = String(reader.result);
+    const lines = text.split("\n");
+    if(lines[0] !== FILE_MARKER){
+      alert(t("file-bad-format"));
+      return;
+    }
+    let meta;
+    try{ meta = JSON.parse(lines[1]); }catch(e){ alert(t("file-bad-format")); return; }
+    const endIdx = lines.indexOf(FILE_MARKER_END);
+    const content = lines.slice(endIdx + 2).join("\n");
+    const work = {
+      id: "w_" + Date.now(),
+      type: meta.type || "poem",
+      title: meta.title || "Untitled",
+      genre: meta.genre || "",
+      format: meta.format || "a4",
+      lang: meta.lang || state.settings.lang,
+      theme: meta.theme || state.settings.theme,
+      notes: meta.notes || "",
+      content: content,
+      createdAt: Date.now(),
+      updatedAt: Date.now()
+    };
+    state.works.unshift(work);
+    persistWorks();
+    openEditor(work);
+    alert(t("file-loaded"));
+  };
+  reader.readAsText(file, "utf-8");
+}
+
+/* ======================= AI HELP ("Помощь ИИ") ======================= */
+function toggleAssistBar(){
+  const bar = document.getElementById("assistBar");
+  bar.classList.toggle("active");
+  if(bar.classList.contains("active")) document.getElementById("assistInput").focus();
+}
+
+let lastAssistText = "";
+
+async function submitAssist(){
+  if(!state.settings.apiKey){
+    alert(t("need-key-assist"));
+    return;
+  }
+  const instruction = document.getElementById("assistInput").value.trim();
+  document.getElementById("assistBar").classList.remove("active");
+
+  document.getElementById("assistModal").classList.add("active");
+  document.getElementById("assistStage").style.display = "block";
+  document.getElementById("assistResultWrap").style.display = "none";
+  document.getElementById("assistInsertBtn").style.display = "none";
+  document.getElementById("assistStatus").textContent = t("assist-thinking");
+  buildNeuronStage();
+  const stopAnim = startNeuronAnimation();
+
+  const work = state.currentWork;
+  const lang = state.settings.lang;
+  const isPoem = work && work.type === "poem";
+  const text = document.getElementById("page").innerText.trim();
+  const notes = document.getElementById("notesField").value.trim();
+
+  const prompt = lang === "ru"
+    ? 'Ты соавтор-' + (isPoem ? 'поэт' : 'писатель') + '. Вот уже написанный ' + (isPoem ? 'текст стихотворения' : 'текст книги') + ' и заметки автора. '
+      + 'Продолжи текст дальше, сохраняя стиль, ритм' + (isPoem ? ', рифму' : ', тон повествования') + ' и логику сюжета. '
+      + 'Обязательно учти заметки автора — это важные указания, которые нельзя нарушать.\n\n'
+      + 'Заметки автора: ' + (notes || 'нет особых указаний') + '\n'
+      + 'Пожелание к продолжению: ' + (instruction || 'на твоё творческое усмотрение') + '\n\n'
+      + 'Текущий текст:\n' + (text || '(пусто, начни с начала)') + '\n\n'
+      + 'Выведи ТОЛЬКО новый текст-продолжение (без повторения уже написанного и без пояснений).'
+    : 'You are a co-' + (isPoem ? 'poet' : 'writer') + '. Here is the text written so far and the author\'s notes. '
+      + 'Continue the text, keeping the style, rhythm' + (isPoem ? ', rhyme' : ', narrative tone') + ' and plot logic. '
+      + 'You must respect the author\'s notes — they are important constraints.\n\n'
+      + 'Author notes: ' + (notes || 'no special notes') + '\n'
+      + 'Wish for what happens next: ' + (instruction || 'use your own creative judgement') + '\n\n'
+      + 'Current text:\n' + (text || '(empty, start from the beginning)') + '\n\n'
+      + 'Output ONLY the new continuation text (no repetition of existing text, no explanations).';
+
+  try{
+    const result = await callOpenAI(prompt, 700);
+    lastAssistText = result || "";
+    stopAnim();
+    document.getElementById("assistStage").style.display = "none";
+    document.getElementById("assistResultWrap").style.display = "block";
+    document.getElementById("assistResult").textContent = lastAssistText || t("ai-error");
+    document.getElementById("assistInsertBtn").style.display = lastAssistText ? "inline-block" : "none";
+  }catch(e){
+    stopAnim();
+    document.getElementById("assistStage").style.display = "none";
+    document.getElementById("assistResultWrap").style.display = "block";
+    document.getElementById("assistResult").textContent = t("ai-error");
+  }
+}
+
+function insertAssistResult(){
+  if(!lastAssistText) return;
+  const page = document.getElementById("page");
+  const sep = page.innerText && !page.innerText.endsWith("\n") ? "\n\n" : "\n";
+  page.innerText = (page.innerText || "") + sep + lastAssistText;
+  if(state.currentWork) state.currentWork.content = page.innerText;
+  updateWordCount();
+  closeAssist();
+}
+
+function closeAssist(){ document.getElementById("assistModal").classList.remove("active"); }
+
+/* neuron-firing loading animation: central blue core + small satellite nodes + flashing synapse lines */
+function buildNeuronStage(){
+  const stage = document.getElementById("neuronStage");
+  stage.querySelectorAll(".neuron-node, .neuron-line").forEach(n=>n.remove());
+  const r = 95, cx = 120, cy = 120, count = 8;
+  for(let i=0;i<count;i++){
+    const angle = (i / count) * Math.PI * 2;
+    const x = cx + r * Math.cos(angle);
+    const y = cy + r * Math.sin(angle);
+    const node = document.createElement("div");
+    node.className = "neuron-node";
+    node.style.left = (x - 5) + "px";
+    node.style.top = (y - 5) + "px";
+    node.dataset.x = x; node.dataset.y = y;
+    stage.appendChild(node);
+
+    const dx = x - cx, dy = y - cy;
+    const len = Math.sqrt(dx*dx + dy*dy);
+    const ang = Math.atan2(dy, dx) * 180 / Math.PI;
+    const line = document.createElement("div");
+    line.className = "neuron-line";
+    line.style.width = len + "px";
+    line.style.left = cx + "px";
+    line.style.top = cy + "px";
+    line.style.transform = "rotate(" + ang + "deg)";
+    line.dataset.idx = i;
+    stage.appendChild(line);
+  }
+}
+
+function startNeuronAnimation(){
+  const lines = Array.from(document.querySelectorAll("#neuronStage .neuron-line"));
+  let stopped = false;
+  function fire(){
+    if(stopped) return;
+    const n = 1 + Math.floor(Math.random()*2);
+    const shuffled = lines.slice().sort(()=>Math.random()-0.5).slice(0,n);
+    shuffled.forEach(l=>{
+      l.classList.remove("flash");
+      void l.offsetWidth;
+      l.classList.add("flash");
+    });
+    setTimeout(fire, 260 + Math.random()*260);
+  }
+  fire();
+  return () => { stopped = true; };
+}
+
+
+(function init(){
+  setTheme(state.settings.theme || "light", true);
+  setLang(state.settings.lang || "ru", true);
+  renderWorksList();
+  if("serviceWorker" in navigator){
+    navigator.serviceWorker.register("sw.js").catch(()=>{});
+  }
+})();
+</script>
+</body>
+</html>
